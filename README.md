@@ -29,6 +29,16 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Equity curve y metricas comparables minimas
 - Script `scripts/run_benchmarks.py` con defaults conservadores, `--fee-bps` preferido y `--fee` por compatibilidad
 
+## Alcance de F1.4
+
+- Motor de backtesting honesto, simple y auditable para estrategias long/flat
+- Carga del CSV OHLCV actual con deteccion explicita de gaps residuales
+- Ejecucion conservadora: la senal observada en `close[t]` se ejecuta en `close[t+1]`
+- Fees configurables y slippage configurable
+- Equity curve, trades cerrados y metricas base
+- Script `scripts/run_backtest.py` para correr una estrategia de prueba sobre el dataset actual
+- Comparacion de la estrategia F1.4 contra benchmarks ya disponibles en F1.3
+
 ## Requisitos
 
 - Python 3.11 o superior
@@ -139,3 +149,25 @@ El script:
 - imprime una tabla comparativa para Buy & Hold, DCA mensual y SMA crossover
 - acepta `--fee-bps` como opcion preferida; `25` significa `0.25%`
 - mantiene `--fee` por compatibilidad y lo interpreta como tasa decimal; `0.0025` significa `25` bps
+
+## F1.4 Uso rapido
+
+Ejecutar el backtest honesto con la estrategia de prueba:
+
+```powershell
+python .\scripts\run_backtest.py
+```
+
+Ejemplo con parametros:
+
+```powershell
+python .\scripts\run_backtest.py --market BTC-EUR --timeframe 1h --fee-bps 10 --slippage-bps 5 --sma-fast 20 --sma-slow 50
+```
+
+El script:
+
+- carga el CSV OHLCV persistido y reporta gaps residuales si existen
+- genera una senal long/flat simple basada en SMA crossover
+- aplica ejecucion conservadora sin look-ahead
+- descuenta fees y slippage en cada cambio de posicion
+- imprime metricas netas y una comparativa con benchmarks F1.3
