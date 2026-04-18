@@ -9,6 +9,8 @@ from alpha_x.data.ohlcv_models import OhlcvRecord, normalize_ohlcv_frame
 
 
 class BitvavoClient:
+    max_candles_per_request = 1000
+
     def __init__(self, base_url: str, timeout: int = 30) -> None:
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
@@ -23,6 +25,13 @@ class BitvavoClient:
         start: int | None = None,
         end: int | None = None,
     ) -> pd.DataFrame:
+        if limit <= 0:
+            raise ValueError("limit must be positive.")
+        if limit > self.max_candles_per_request:
+            raise ValueError(
+                f"limit exceeds Bitvavo max_candles_per_request={self.max_candles_per_request}"
+            )
+
         params: dict[str, Any] = {"interval": interval, "limit": limit}
         if start is not None:
             params["start"] = start

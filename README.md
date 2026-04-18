@@ -17,6 +17,7 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Pipeline de descarga, normalizacion, merge, dedupe y persistencia en CSV
 - Validacion temporal de orden, unicidad y huecos por timeframe
 - Script `scripts/fetch_ohlcv.py` con modo de descarga y modo `--validate-only`
+- Backfill historico incremental y reproducible con `--backfill --target-rows`
 
 ## Alcance de F1.3
 
@@ -84,11 +85,24 @@ Validacion del CSV persistido:
 python .\scripts\fetch_ohlcv.py --market BTC-EUR --interval 1h --validate-only
 ```
 
+Backfill historico incremental:
+
+```powershell
+python .\scripts\fetch_ohlcv.py --market BTC-EUR --interval 1h --backfill --target-rows 10000
+```
+
 CSV generado:
 
 ```text
 data/raw/bitvavo/btc-eur_1h.csv
 ```
+
+Notas de backfill:
+
+- el script encadena multiples requests REST contra Bitvavo
+- cada bloque se fusiona por `timestamp` y no duplica filas existentes
+- repetir el comando no hace crecer artificialmente el CSV si no hay filas nuevas
+- al final se informa el rango temporal y el `gap count`
 
 ## F1.3 Uso rapido
 

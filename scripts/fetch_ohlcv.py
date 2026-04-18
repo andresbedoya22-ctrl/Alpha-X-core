@@ -4,7 +4,11 @@ import argparse
 
 from alpha_x.config.settings import get_settings
 from alpha_x.data.bitvavo_client import BitvavoClient
-from alpha_x.data.ohlcv_pipeline import fetch_and_store_ohlcv, validate_existing_ohlcv
+from alpha_x.data.ohlcv_pipeline import (
+    backfill_and_store_ohlcv,
+    fetch_and_store_ohlcv,
+    validate_existing_ohlcv,
+)
 from alpha_x.utils.logging_utils import configure_logging
 
 
@@ -15,6 +19,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--limit", type=int, help="Number of candles to request.")
     parser.add_argument("--start", type=int, help="Start timestamp in milliseconds.")
     parser.add_argument("--end", type=int, help="End timestamp in milliseconds.")
+    parser.add_argument(
+        "--backfill",
+        action="store_true",
+        help="Download historical OHLCV in multiple requests until target rows are reached.",
+    )
+    parser.add_argument(
+        "--target-rows",
+        type=int,
+        help="Desired final row count for backfill mode.",
+    )
     parser.add_argument(
         "--validate-only",
         action="store_true",
@@ -31,6 +45,9 @@ def main() -> None:
     market = args.market or settings.bitvavo_market
     timeframe = args.interval or settings.ohlcv_default_interval
     limit = args.limit or settings.ohlcv_default_limit
+
+    if args.backfill and args.validate_only:
+        raise ValueError("--backfill cannot be used together with --validate-only.")
 
     if args.validate_only:
         csv_path, frame, report = validate_existing_ohlcv(settings.raw_data_dir, market, timeframe)
@@ -49,6 +66,21 @@ def main() -> None:
         return
 
     client = BitvavoClient(base_url=settings.bitvavo_base_url)
+    if args.backfill:
+        target_rows = args.target_rows or 10_000
+        backfill_and_store_ohlcv(
+            client=client,
+            raw_data_dir=settings.raw_data_dir,
+            market=market,
+            timeframe=timeframe,
+            limit=limit,
+            logger=logger,
+            target_rows=target_rows,
+            start=args.start,
+            end=args.end,
+        )
+        return
+
     fetch_and_store_ohlcv(
         client=client,
         raw_data_dir=settings.raw_data_dir,
