@@ -18,6 +18,14 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Runner `scripts/run_labeling.py` para comparar distribuciones de labels y parametros
 - Export reproducible a `reports/labeling/<run_id>/`
 
+## Alcance de V2 / F2.3
+
+- Capa base de validacion temporal robusta para hipotesis y benchmark minimo
+- Split temporal `train/validation/test` sin shuffle ni leakage
+- Walk-forward expanding para revisar estabilidad OOS
+- Sensibilidad local de parametros para pocas hipotesis candidatas
+- Export reproducible a `reports/validation/<run_id>/`
+
 ## Alcance de F1.1
 
 - Estructura profesional de proyecto Python con `src/`
@@ -90,6 +98,7 @@ src/alpha_x/
   benchmarks/
   labeling/
   strategies/
+  validation/
   config/
   data/
   backtest/
@@ -252,3 +261,20 @@ El script:
 - descarta filas cuyo futuro cruza gaps reales o no llega limpio al final del dataset
 - imprime por metodo el total etiquetado, distribucion de clases, filas descartadas y rango cubierto
 - exporta `summary.json`, `summary.csv`, `labels.csv` y `manifest.json` en `reports/labeling/<run_id>/`
+
+## V2 / F2.3 Uso rapido
+
+Ejecutar validacion robusta:
+
+```powershell
+python .\scripts\run_validation.py
+```
+
+El script:
+
+- carga el dataset OHLCV persistido actual de BTC-EUR 1h
+- valida Benchmark C, Hypothesis 1 y Hypothesis 5 con split temporal y walk-forward
+- usa fees y slippage agresivos por defecto para no suavizar OOS
+- corre una sensibilidad local de parametros sobre el tramo `test`
+- reporta gaps residuales por tramo y agrega resultados OOS sin mezclar tiempos
+- exporta `summary.json`, `validation_rows.csv`, `oos_aggregate.csv` y `manifest.json` en `reports/validation/<run_id>/`
