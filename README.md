@@ -39,6 +39,14 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Script `scripts/run_backtest.py` para correr una estrategia de prueba sobre el dataset actual
 - Comparacion de la estrategia F1.4 contra benchmarks ya disponibles en F1.3
 
+## Alcance de F1.5
+
+- Capa base de reporting reproducible para benchmarks y backtests
+- Export a `reports/` en formatos simples y auditables: JSON y CSV
+- `run_id` por corrida para identificar y guardar resultados
+- Contexto persistente suficiente para auditar dataset, rows, gaps, fees y parametros
+- Scripts `scripts/export_benchmark_report.py` y `scripts/export_backtest_report.py`
+
 ## Requisitos
 
 - Python 3.11 o superior
@@ -171,3 +179,25 @@ El script:
 - aplica ejecucion conservadora sin look-ahead
 - descuenta fees y slippage en cada cambio de posicion
 - imprime metricas netas y una comparativa con benchmarks F1.3
+
+## F1.5 Uso rapido
+
+Exportar benchmarks a `reports/benchmarks/<run_id>/`:
+
+```powershell
+python .\scripts\export_benchmark_report.py
+```
+
+Exportar backtest a `reports/backtests/<run_id>/`:
+
+```powershell
+python .\scripts\export_backtest_report.py
+```
+
+Los scripts:
+
+- crean una carpeta de salida por corrida dentro de `reports/`
+- guardan `summary.json` y `summary.csv`
+- exportan equity curves en CSV
+- exportan `trades.csv` y `manifest.json` para backtests
+- imprimen la ruta del reporte, archivos creados y un resumen corto de la corrida
