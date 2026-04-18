@@ -2,6 +2,14 @@
 
 Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 
+## Alcance de V2 / F2.1
+
+- Capa inicial de hipotesis simples long/flat sobre BTC-EUR 1h
+- Familias base: trend following, momentum, breakout, mean reversion y volatility filter
+- Senales 0/1 reproducibles y sin look-ahead adicional al motor actual
+- Runner `scripts/run_hypotheses.py` para ejecutar y comparar hipotesis contra benchmarks
+- Export reproducible a `reports/hypotheses/<run_id>/`
+
 ## Alcance de F1.1
 
 - Estructura profesional de proyecto Python con `src/`
@@ -72,6 +80,7 @@ python .\scripts\run_benchmarks.py
 ```text
 src/alpha_x/
   benchmarks/
+  strategies/
   config/
   data/
   backtest/
@@ -201,3 +210,20 @@ Los scripts:
 - exportan equity curves en CSV
 - exportan `trades.csv` y `manifest.json` para backtests
 - imprimen la ruta del reporte, archivos creados y un resumen corto de la corrida
+
+## V2 / F2.1 Uso rapido
+
+Ejecutar las hipotesis base:
+
+```powershell
+python .\scripts\run_hypotheses.py
+```
+
+El script:
+
+- carga el dataset OHLCV persistido actual de BTC-EUR 1h
+- genera cinco hipotesis simples y explicitas con senal 0/1
+- reutiliza el backtester honesto long/flat existente
+- compara cada hipotesis contra Buy & Hold, DCA mensual y SMA baseline
+- imprime una tabla final con retorno total, annualized, max drawdown, profit factor, trades, exposure y final equity
+- exporta `summary.json`, `summary.csv`, `equity_curves.csv`, `signals.csv` y `manifest.json` en `reports/hypotheses/<run_id>/`
