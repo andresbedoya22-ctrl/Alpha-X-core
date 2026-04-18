@@ -7,6 +7,8 @@ from alpha_x.data.bitvavo_client import BitvavoClient
 from alpha_x.data.ohlcv_pipeline import (
     backfill_and_store_ohlcv,
     fetch_and_store_ohlcv,
+    format_gap_report,
+    repair_ohlcv_gaps,
     validate_existing_ohlcv,
 )
 from alpha_x.utils.logging_utils import configure_logging
@@ -34,6 +36,16 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Validate the existing CSV without calling Bitvavo.",
     )
+    parser.add_argument(
+        "--report-gaps",
+        action="store_true",
+        help="Report detected OHLCV gaps for the persisted CSV.",
+    )
+    parser.add_argument(
+        "--repair-gaps",
+        action="store_true",
+        help="Attempt to repair detected OHLCV gaps by re-downloading only missing windows.",
+    )
     return parser
 
 
@@ -46,8 +58,11 @@ def main() -> None:
     timeframe = args.interval or settings.ohlcv_default_interval
     limit = args.limit or settings.ohlcv_default_limit
 
-    if args.backfill and args.validate_only:
-        raise ValueError("--backfill cannot be used together with --validate-only.")
+    mode_flags = [args.backfill, args.validate_only, args.report_gaps, args.repair_gaps]
+    if sum(bool(flag) for flag in mode_flags) > 1:
+        raise ValueError(
+            "--backfill, --validate-only, --report-gaps and --repair-gaps are mutually exclusive."
+        )
 
     if args.validate_only:
         csv_path, frame, report = validate_existing_ohlcv(settings.raw_data_dir, market, timeframe)
@@ -65,7 +80,25 @@ def main() -> None:
             )
         return
 
+    if args.report_gaps:
+        csv_path, frame, report = validate_existing_ohlcv(settings.raw_data_dir, market, timeframe)
+        logger.info("Gap report for %s", csv_path.resolve())
+        logger.info("Rows: %s", len(frame))
+        for line in format_gap_report(report):
+            logger.info(line)
+        return
+
     client = BitvavoClient(base_url=settings.bitvavo_base_url)
+    if args.repair_gaps:
+        repair_ohlcv_gaps(
+            client=client,
+            raw_data_dir=settings.raw_data_dir,
+            market=market,
+            timeframe=timeframe,
+            logger=logger,
+        )
+        return
+
     if args.backfill:
         target_rows = args.target_rows or 10_000
         backfill_and_store_ohlcv(

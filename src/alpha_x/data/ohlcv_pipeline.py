@@ -14,7 +14,11 @@ from alpha_x.data.ohlcv_storage import (
     merge_ohlcv_frames,
     save_ohlcv_csv,
 )
-from alpha_x.data.ohlcv_validation import OhlcvValidationReport, validate_temporal_integrity
+from alpha_x.data.ohlcv_validation import (
+    OhlcvValidationReport,
+    summarize_gaps,
+    validate_temporal_integrity,
+)
 
 
 @dataclass(frozen=True)
@@ -25,6 +29,18 @@ class OhlcvPipelineResult:
     final_rows: int
     new_rows_added: int
     request_count: int
+    validation: OhlcvValidationReport
+
+
+@dataclass(frozen=True)
+class OhlcvGapRepairResult:
+    csv_path: Path
+    requests_made: int
+    downloaded_rows: int
+    rows_added: int
+    repaired_gaps: int
+    remaining_gaps: int
+    remaining_missing_intervals: int
     validation: OhlcvValidationReport
 
 
@@ -231,6 +247,162 @@ def validate_existing_ohlcv(
     frame = load_ohlcv_csv(csv_path)
     report = validate_temporal_integrity(frame, timeframe)
     return csv_path, frame, report
+
+
+def repair_ohlcv_gaps(
+    client: BitvavoClient,
+    raw_data_dir: Path,
+    market: str,
+    timeframe: str,
+    logger: logging.Logger,
+) -> OhlcvGapRepairResult:
+    csv_path, existing, initial_report = validate_existing_ohlcv(raw_data_dir, market, timeframe)
+    initial_summary = summarize_gaps(initial_report)
+    if not initial_report.gaps:
+        logger.info("No gaps detected for %s %s. Repair skipped.", market, timeframe)
+        return OhlcvGapRepairResult(
+            csv_path=csv_path,
+            requests_made=0,
+            downloaded_rows=0,
+            rows_added=0,
+            repaired_gaps=0,
+            remaining_gaps=0,
+            remaining_missing_intervals=0,
+            validation=initial_report,
+        )
+
+    candle_ms = int(timeframe_to_timedelta(timeframe).total_seconds() * 1000)
+    merged = existing.copy()
+    requests_made = 0
+    downloaded_rows = 0
+
+    for index, gap in enumerate(initial_report.gaps, start=1):
+        missing_start = gap.previous_timestamp + candle_ms
+        missing_end = gap.current_timestamp - candle_ms
+        requested_missing = gap.missing_intervals
+        window_start = gap.previous_timestamp
+        window_end = gap.current_timestamp
+        cursor_start = window_start
+
+        logger.info(
+            "Repair gap %s/%s | missing_start=%s missing_end=%s missing_intervals=%s",
+            index,
+            len(initial_report.gaps),
+            missing_start,
+            missing_end,
+            requested_missing,
+        )
+
+        while cursor_start <= window_end:
+            remaining_intervals = ((window_end - cursor_start) // candle_ms) + 1
+            request_limit = min(client.max_candles_per_request, int(remaining_intervals))
+            try:
+                batch = client.fetch_candles(
+                    market=market,
+                    interval=timeframe,
+                    limit=request_limit,
+                    start=cursor_start,
+                    end=window_end,
+                )
+            except RuntimeError as error:
+                logger.warning(
+                    "Repair request failed for gap %s at start=%s end=%s: %s",
+                    index,
+                    cursor_start,
+                    window_end,
+                    error,
+                )
+                break
+            requests_made += 1
+            downloaded_rows += len(batch)
+
+            if batch.empty:
+                logger.info(
+                    "Repair request returned no rows for gap %s at start=%s end=%s",
+                    index,
+                    cursor_start,
+                    window_end,
+                )
+                break
+
+            previous_rows = len(merged)
+            merged = merge_ohlcv_frames(merged, batch)
+            logger.info(
+                "Repair response gap %s | downloaded=%s new_rows=%s",
+                index,
+                len(batch),
+                len(merged) - previous_rows,
+            )
+
+            last_timestamp = int(batch["timestamp"].iloc[-1])
+            next_start = last_timestamp + candle_ms
+            if next_start <= cursor_start:
+                break
+            cursor_start = next_start
+
+            if len(batch) < request_limit:
+                break
+
+    final_validation = validate_temporal_integrity(merged, timeframe)
+    if not final_validation.is_sorted:
+        raise RuntimeError("Temporal validation failed: timestamps are not sorted ascending.")
+    if not final_validation.has_unique_timestamps:
+        raise RuntimeError("Temporal validation failed: duplicate timestamps remain after merge.")
+
+    save_ohlcv_csv(merged, csv_path)
+
+    final_summary = summarize_gaps(final_validation)
+    repaired_gaps = initial_summary.gap_count - final_summary.gap_count
+    rows_added = len(merged) - len(existing)
+
+    logger.info("Gap repair completed for %s %s", market, timeframe)
+    logger.info("CSV path: %s", csv_path.resolve())
+    logger.info("Requests made: %s", requests_made)
+    logger.info("Downloaded rows: %s", downloaded_rows)
+    logger.info("Rows added: %s", rows_added)
+    logger.info("Gaps repaired: %s", repaired_gaps)
+    logger.info("Remaining gaps: %s", final_summary.gap_count)
+    logger.info("Remaining missing intervals: %s", final_summary.total_missing_intervals)
+
+    return OhlcvGapRepairResult(
+        csv_path=csv_path,
+        requests_made=requests_made,
+        downloaded_rows=downloaded_rows,
+        rows_added=rows_added,
+        repaired_gaps=repaired_gaps,
+        remaining_gaps=final_summary.gap_count,
+        remaining_missing_intervals=final_summary.total_missing_intervals,
+        validation=final_validation,
+    )
+
+
+def format_gap_report(report: OhlcvValidationReport) -> list[str]:
+    summary = summarize_gaps(report)
+    lines = [
+        f"Gap count: {summary.gap_count}",
+        f"Total missing intervals: {summary.total_missing_intervals}",
+        f"Gap size buckets: 1={summary.size_buckets['1']}, 2-3={summary.size_buckets['2-3']}, "
+        f"4-12={summary.size_buckets['4-12']}, 13+={summary.size_buckets['13+']}",
+    ]
+
+    if summary.gap_count == 0:
+        lines.append("Affected range: N/A")
+        return lines
+
+    lines.extend(
+        [
+            f"Affected range: {summary.affected_start} -> {summary.affected_end}",
+            f"Smallest gap: {summary.smallest_gap}",
+            f"Largest gap: {summary.largest_gap}",
+            "Detected gaps:",
+        ]
+    )
+    for gap in report.gaps:
+        lines.append(
+            f"- previous={gap.previous_timestamp} current={gap.current_timestamp} "
+            f"missing_intervals={gap.missing_intervals}"
+        )
+    return lines
 
 
 def _resolve_initial_backfill_end(

@@ -26,6 +26,17 @@ class OhlcvValidationReport:
         return self.is_sorted and self.has_unique_timestamps and not self.gaps
 
 
+@dataclass(frozen=True)
+class OhlcvGapSummary:
+    gap_count: int
+    total_missing_intervals: int
+    smallest_gap: int | None
+    largest_gap: int | None
+    affected_start: int | None
+    affected_end: int | None
+    size_buckets: dict[str, int]
+
+
 def validate_temporal_integrity(frame: pd.DataFrame, timeframe: str) -> OhlcvValidationReport:
     if timeframe == "1M":
         raise ValueError("Gap detection for timeframe 1M is not supported in F1.2.")
@@ -73,4 +84,39 @@ def validate_temporal_integrity(frame: pd.DataFrame, timeframe: str) -> OhlcvVal
         is_sorted=is_sorted,
         has_unique_timestamps=has_unique_timestamps,
         gaps=gaps,
+    )
+
+
+def summarize_gaps(report: OhlcvValidationReport) -> OhlcvGapSummary:
+    if not report.gaps:
+        return OhlcvGapSummary(
+            gap_count=0,
+            total_missing_intervals=0,
+            smallest_gap=None,
+            largest_gap=None,
+            affected_start=None,
+            affected_end=None,
+            size_buckets={"1": 0, "2-3": 0, "4-12": 0, "13+": 0},
+        )
+
+    missing_sizes = [gap.missing_intervals for gap in report.gaps]
+    size_buckets = {"1": 0, "2-3": 0, "4-12": 0, "13+": 0}
+    for size in missing_sizes:
+        if size == 1:
+            size_buckets["1"] += 1
+        elif size <= 3:
+            size_buckets["2-3"] += 1
+        elif size <= 12:
+            size_buckets["4-12"] += 1
+        else:
+            size_buckets["13+"] += 1
+
+    return OhlcvGapSummary(
+        gap_count=len(report.gaps),
+        total_missing_intervals=sum(missing_sizes),
+        smallest_gap=min(missing_sizes),
+        largest_gap=max(missing_sizes),
+        affected_start=min(gap.previous_timestamp for gap in report.gaps),
+        affected_end=max(gap.current_timestamp for gap in report.gaps),
+        size_buckets=size_buckets,
     )

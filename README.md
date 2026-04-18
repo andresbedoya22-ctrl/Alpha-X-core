@@ -18,6 +18,7 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Validacion temporal de orden, unicidad y huecos por timeframe
 - Script `scripts/fetch_ohlcv.py` con modo de descarga y modo `--validate-only`
 - Backfill historico incremental y reproducible con `--backfill --target-rows`
+- Diagnostico y reparacion conservadora de gaps con `--report-gaps` y `--repair-gaps`
 
 ## Alcance de F1.3
 
@@ -91,6 +92,18 @@ Backfill historico incremental:
 python .\scripts\fetch_ohlcv.py --market BTC-EUR --interval 1h --backfill --target-rows 10000
 ```
 
+Reporte de gaps:
+
+```powershell
+python .\scripts\fetch_ohlcv.py --market BTC-EUR --interval 1h --report-gaps
+```
+
+Intento conservador de reparacion de gaps:
+
+```powershell
+python .\scripts\fetch_ohlcv.py --market BTC-EUR --interval 1h --repair-gaps
+```
+
 CSV generado:
 
 ```text
@@ -103,6 +116,7 @@ Notas de backfill:
 - cada bloque se fusiona por `timestamp` y no duplica filas existentes
 - repetir el comando no hace crecer artificialmente el CSV si no hay filas nuevas
 - al final se informa el rango temporal y el `gap count`
+- `--repair-gaps` solo reconsulta ventanas faltantes reales; no rellena velas sinteticas
 
 ## F1.3 Uso rapido
 

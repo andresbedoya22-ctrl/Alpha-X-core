@@ -22,3 +22,12 @@ def test_build_parser_accepts_backfill_arguments() -> None:
 
     assert args.backfill is True
     assert args.target_rows == 10000
+
+
+def test_build_parser_accepts_gap_arguments() -> None:
+    module = load_fetch_ohlcv_module()
+
+    args = module.build_parser().parse_args(["--report-gaps"])
+
+    assert args.report_gaps is True
+    assert args.repair_gaps is False
