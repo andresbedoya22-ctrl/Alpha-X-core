@@ -18,6 +18,15 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Validacion temporal de orden, unicidad y huecos por timeframe
 - Script `scripts/fetch_ohlcv.py` con modo de descarga y modo `--validate-only`
 
+## Alcance de F1.3
+
+- Benchmark Engine base sobre CSV OHLCV validado
+- Benchmark A: Buy & Hold BTC/EUR
+- Benchmark B: DCA mensual BTC/EUR
+- Benchmark C: baseline cuantitativa simple con SMA crossover long/flat
+- Equity curve y metricas comparables minimas
+- Script `scripts/run_benchmarks.py` con defaults conservadores, `--fee-bps` preferido y `--fee` por compatibilidad
+
 ## Requisitos
 
 - Python 3.11 o superior
@@ -35,12 +44,14 @@ python .\scripts\healthcheck.py
 python .\scripts\fetch_ohlcv.py --market BTC-EUR --interval 1h --limit 500
 pytest
 ruff check .
+python .\scripts\run_benchmarks.py
 ```
 
 ## Estructura
 
 ```text
 src/alpha_x/
+  benchmarks/
   config/
   data/
   backtest/
@@ -78,3 +89,25 @@ CSV generado:
 ```text
 data/raw/bitvavo/btc-eur_1h.csv
 ```
+
+## F1.3 Uso rapido
+
+Ejecutar benchmarks con defaults:
+
+```powershell
+python .\scripts\run_benchmarks.py
+```
+
+Ejemplo con parametros:
+
+```powershell
+python .\scripts\run_benchmarks.py --market BTC-EUR --timeframe 1h --fee-bps 25 --sma-fast 20 --sma-slow 50
+```
+
+El script:
+
+- carga `data/raw/bitvavo/btc-eur_1h.csv` por defecto
+- valida columnas y coherencia temporal antes de calcular benchmarks
+- imprime una tabla comparativa para Buy & Hold, DCA mensual y SMA crossover
+- acepta `--fee-bps` como opcion preferida; `25` significa `0.25%`
+- mantiene `--fee` por compatibilidad y lo interpreta como tasa decimal; `0.0025` significa `25` bps

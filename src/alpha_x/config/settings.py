@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     bitvavo_market: str = Field(default="BTC-EUR", alias="BITVAVO_MARKET")
     ohlcv_default_interval: str = Field(default="1h", alias="OHLCV_DEFAULT_INTERVAL")
     ohlcv_default_limit: int = Field(default=1000, alias="OHLCV_DEFAULT_LIMIT")
+    benchmark_fee_rate: float = Field(default=0.001, alias="BENCHMARK_FEE_RATE")
+    benchmark_initial_capital: float = Field(default=10_000.0, alias="BENCHMARK_INITIAL_CAPITAL")
+    benchmark_dca_amount: float = Field(default=1_000.0, alias="BENCHMARK_DCA_AMOUNT")
+    benchmark_sma_fast: int = Field(default=20, alias="BENCHMARK_SMA_FAST")
+    benchmark_sma_slow: int = Field(default=50, alias="BENCHMARK_SMA_SLOW")
 
     def ensure_directories(self) -> None:
         for directory in (
