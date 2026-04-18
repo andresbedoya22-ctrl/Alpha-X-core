@@ -10,6 +10,14 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Runner `scripts/run_hypotheses.py` para ejecutar y comparar hipotesis contra benchmarks
 - Export reproducible a `reports/hypotheses/<run_id>/`
 
+## Alcance de V2 / F2.2
+
+- Capa base de labeling auditable para eventos operables sobre BTC-EUR 1h
+- Tres enfoques: next-bar, fixed horizon y triple barrier
+- Manejo explicito de gaps reales y bordes del dataset como filas descartadas
+- Runner `scripts/run_labeling.py` para comparar distribuciones de labels y parametros
+- Export reproducible a `reports/labeling/<run_id>/`
+
 ## Alcance de F1.1
 
 - Estructura profesional de proyecto Python con `src/`
@@ -80,6 +88,7 @@ python .\scripts\run_benchmarks.py
 ```text
 src/alpha_x/
   benchmarks/
+  labeling/
   strategies/
   config/
   data/
@@ -227,3 +236,19 @@ El script:
 - compara cada hipotesis contra Buy & Hold, DCA mensual y SMA baseline
 - imprime una tabla final con retorno total, annualized, max drawdown, profit factor, trades, exposure y final equity
 - exporta `summary.json`, `summary.csv`, `equity_curves.csv`, `signals.csv` y `manifest.json` en `reports/hypotheses/<run_id>/`
+
+## V2 / F2.2 Uso rapido
+
+Ejecutar labeling base:
+
+```powershell
+python .\scripts\run_labeling.py
+```
+
+El script:
+
+- carga el dataset OHLCV persistido actual de BTC-EUR 1h
+- ejecuta next-bar, fixed horizon y triple barrier con parametros explicitos
+- descarta filas cuyo futuro cruza gaps reales o no llega limpio al final del dataset
+- imprime por metodo el total etiquetado, distribucion de clases, filas descartadas y rango cubierto
+- exporta `summary.json`, `summary.csv`, `labels.csv` y `manifest.json` en `reports/labeling/<run_id>/`
