@@ -58,6 +58,14 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Validacion temporal estricta `train/validation/test` sin shuffle
 - Traduccion operacional minima a senal long/flat con backtest reproducible en `test`
 
+## Alcance de V3 / F3.4
+
+- Decision policies sobrias sobre scores del mejor modelo base de F3.3
+- Cuatro variantes fijas de alta conviccion y filtro opcional por regimen
+- Evaluacion OOS solo en el mismo periodo `test`
+- Comparacion contra Hypothesis 5, SMA baseline y Buy & Hold
+- Export reproducible a `reports/model_policies/<run_id>/`
+
 ## Alcance de F1.1
 
 - Estructura profesional de proyecto Python con `src/`
@@ -390,3 +398,24 @@ El script:
 - convierte el mejor baseline supervisado a una senal long/flat por umbral de probabilidad
 - compara ese backtest OOS contra Hypothesis 5 y SMA baseline
 - exporta `summary.json`, `supervised_dataset.csv`, `model_metrics.csv`, `regime_metrics.csv`, `backtest_comparison.csv` y `manifest.json` en `reports/modeling/<run_id>/`
+
+## V3 / F3.4 Uso rapido
+
+Ejecutar las decision policies:
+
+```powershell
+python .\scripts\run_model_policies.py
+```
+
+El script:
+
+- reutiliza el mismo dataset supervisado y el mejor modelo base reproducible de F3.3
+- reentrena el modelo con `train + validation` y scorea solo el periodo `test`
+- ejecuta exactamente cuatro variantes de policy:
+  - A: `p > 0.65`
+  - B: `p > 0.70`
+  - C: `regime == trend_up_high_vol` y `p > 0.60`
+  - D: `regime == trend_up_high_vol` y `p > 0.65`
+- mantiene el resto del tiempo en `flat`
+- compara cada variante contra Hypothesis 5, SMA baseline y Buy & Hold en el mismo tramo `test`
+- exporta `summary.json`, `scored_test_frame.csv`, `policy_signals.csv`, `policy_summary.csv`, `backtest_comparison.csv` y `manifest.json` en `reports/model_policies/<run_id>/`
