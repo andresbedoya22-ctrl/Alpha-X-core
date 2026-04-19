@@ -26,6 +26,14 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Sensibilidad local de parametros para pocas hipotesis candidatas
 - Export reproducible a `reports/validation/<run_id>/`
 
+## Alcance de V2 / F2.4
+
+- Capa corta de refinamientos operativos para reducir ruido y churn antes de V3
+- Resample explicito y auditable de 1h a 4h
+- Reglas simples: minimum holding, cooldown y confirmacion minima
+- Comparacion 1h vs 4h y baseline vs refinado con foco en OOS y churn
+- Export reproducible a `reports/refinements/<run_id>/`
+
 ## Alcance de F1.1
 
 - Estructura profesional de proyecto Python con `src/`
@@ -97,6 +105,7 @@ python .\scripts\run_benchmarks.py
 src/alpha_x/
   benchmarks/
   labeling/
+  refinements/
   strategies/
   validation/
   config/
@@ -278,3 +287,19 @@ El script:
 - corre una sensibilidad local de parametros sobre el tramo `test`
 - reporta gaps residuales por tramo y agrega resultados OOS sin mezclar tiempos
 - exporta `summary.json`, `validation_rows.csv`, `oos_aggregate.csv` y `manifest.json` en `reports/validation/<run_id>/`
+
+## V2 / F2.4 Uso rapido
+
+Ejecutar refinamientos operativos:
+
+```powershell
+python .\scripts\run_refinements.py
+```
+
+El script:
+
+- deriva 4h de forma explicita y auditable a partir del dataset 1h
+- prueba pocas variantes defendibles sobre Volatility Filter y un control SMA 4h
+- aplica minimum holding, cooldown y una confirmacion minima solo donde corresponde
+- compara resultados OOS agregados y deltas de churn frente a sus baselines
+- exporta `summary.json`, `validation_rows.csv`, `oos_summary.csv`, `comparisons.csv` y `manifest.json` en `reports/refinements/<run_id>/`
