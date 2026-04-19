@@ -66,6 +66,14 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Comparacion contra Hypothesis 5, SMA baseline y Buy & Hold
 - Export reproducible a `reports/model_policies/<run_id>/`
 
+## Alcance de V3 / F3.5
+
+- Stress test minimo de la policy condicional hallada en F3.4
+- Misma base supervisada, mismo modelo, mismo split y mismo regimen
+- Stress local solo sobre `trend_up_high_vol` con umbrales `0.60`, `0.65` y `0.70`
+- Segmentacion del `test` en 3 subtramos temporales ordenados
+- Export reproducible a `reports/policy_stress/<run_id>/`
+
 ## Alcance de F1.1
 
 - Estructura profesional de proyecto Python con `src/`
@@ -419,3 +427,24 @@ El script:
 - mantiene el resto del tiempo en `flat`
 - compara cada variante contra Hypothesis 5, SMA baseline y Buy & Hold en el mismo tramo `test`
 - exporta `summary.json`, `scored_test_frame.csv`, `policy_signals.csv`, `policy_summary.csv`, `backtest_comparison.csv` y `manifest.json` en `reports/model_policies/<run_id>/`
+
+## V3 / F3.5 Uso rapido
+
+Ejecutar el stress test de policy:
+
+```powershell
+python .\scripts\run_policy_stress.py
+```
+
+El script:
+
+- reutiliza el mismo mejor modelo base reproducible de F3.3/F3.4
+- scorea exactamente el mismo periodo `test`
+- compara solo tres variantes locales sobre la policy condicional:
+  - `trend_up_high_vol` y `p > 0.60`
+  - `trend_up_high_vol` y `p > 0.65`
+  - `trend_up_high_vol` y `p > 0.70`
+- divide el `test` en 3 subtramos temporales ordenados para revisar estabilidad minima
+- reporta activacion, trades, exposure, retorno y drawdown por variante y por subtramo
+- compara contra Hypothesis 5, la mejor policy global de F3.4 y Buy & Hold
+- exporta `summary.json`, `scored_test_frame.csv`, `stress_policy_signals.csv`, `stress_summary.csv`, `subperiod_stability.csv`, `comparison.csv` y `manifest.json` en `reports/policy_stress/<run_id>/`
