@@ -9,6 +9,7 @@ def test_settings_defaults(tmp_path: Path) -> None:
         LOG_DIR=tmp_path / "logs",
         REPORTS_DIR=tmp_path / "reports",
         RAW_DATA_DIR=tmp_path / "raw",
+        EXTERNAL_DATA_DIR=tmp_path / "external",
         PROCESSED_DATA_DIR=tmp_path / "processed",
     )
 
@@ -19,4 +20,5 @@ def test_settings_defaults(tmp_path: Path) -> None:
     assert settings.log_dir.exists()
     assert settings.reports_dir.exists()
     assert settings.raw_data_dir.exists()
+    assert settings.external_data_dir.exists()
     assert settings.processed_data_dir.exists()

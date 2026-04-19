@@ -66,6 +66,62 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Comparacion contra Hypothesis 5, SMA baseline y Buy & Hold
 - Export reproducible a `reports/model_policies/<run_id>/`
 
+## Alcance de V4 / F4 — Multi-Asset + External Data Layer
+
+Pivote estructural tras V3: no hay edge robusto demostrado en BTC/EUR con features
+tecnicas puras. Esta fase prepara la base para investigacion real multi-activo y
+enriquecida con datos contextuales externos.
+
+**Objetivo:** Construir un entorno serio, auditable y honesto de investigacion
+comparativa sin demostrar edge todavia.
+
+### Activos oficiales
+
+- BTC-EUR, ETH-EUR, XRP-EUR, SOL-EUR (exchange: Bitvavo, EUR spot)
+
+### Modulos nuevos
+
+- `src/alpha_x/multi_asset/` — Registro oficial de mercados, carga multi-activo,
+  ventana comun y reporte de paridad de profundidad.
+- `src/alpha_x/external_data/` — Funding rates (Binance FAPI, gratuito, sin auth) y
+  proxy de ETF (Yahoo Finance, precio/volumen de IBIT/ETHA como señal institucional).
+  Capa de alineacion temporal sin leakage con politica de forward-fill explicita y limitada.
+
+### Scripts nuevos
+
+- `scripts/fetch_multi_asset_ohlcv.py` — Backfill para los 4 activos.
+- `scripts/fetch_external_context.py` — Descarga funding rates y proxy ETF.
+- `scripts/run_multi_asset_data_audit.py` — Auditoria reproducible con salida
+  en `reports/multi_asset_data/<run_id>/` (summary.json + asset_coverage.csv).
+
+### Decisiones de diseno documentadas
+
+- Funding rates: señal global de mercado de derivados, no del par EUR spot.
+- ETF proxy: precio/volumen de IBIT/ETHA, NO flujos netos reales (requieren API key).
+- XRP y SOL no tienen spot ETF; usan IBIT como contexto institucional global.
+- Alineacion temporal: as-of backward join (sin leakage). Forward-fill limitado a
+  8 bars para funding (1 ciclo de 8h) y 24 bars para ETF proxy (1 dia).
+- Filas sin contexto externo quedan como NaN, no se descartan automaticamente.
+- La ventana comun multi-activo se reporta explicitamente como referencia para
+  analisis comparativos futuros.
+
+### Limitaciones conocidas (documentadas en summary.json)
+
+- ETH, XRP y SOL pueden tener menos historia OHLCV que BTC.
+- ETF proxy cubre solo desde Jan 2024 (BTC) y Jul 2024 (ETH).
+- Comparaciones cross-activo solo son validas dentro de la ventana OHLCV comun.
+- Funding history de XRP/SOL empieza ~2021, mas corta que BTC/ETH.
+
+## V4 / F4 notas actualizadas
+
+- Funding rates: Bybit V5 linear perps, usados como contexto global de derivados crypto.
+- ETF flows: BTC spot ETF daily flows desde Bitbo, alineados a 1h desde el siguiente dia UTC.
+- ETH ETF flows no se ingieren en esta fase por falta de una fuente libre estable confirmada.
+- XRP y SOL reutilizan el BTC ETF flow como contexto institucional crypto global, de forma explicita.
+- La auditoria exporta tres ventanas comunes: `OHLCV`, `OHLCV + funding` y
+  `OHLCV + funding + ETF flows`.
+- `summary.json` incluye `known_limitations` con cobertura, comparabilidad y reglas de fill.
+
 ## Alcance de V3 / F3.5
 
 - Stress test minimo de la policy condicional hallada en F3.4

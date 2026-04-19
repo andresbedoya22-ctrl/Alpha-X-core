@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     log_dir: Path = Field(default=Path("logs"), alias="LOG_DIR")
     reports_dir: Path = Field(default=Path("reports"), alias="REPORTS_DIR")
     raw_data_dir: Path = Field(default=Path("data/raw"), alias="RAW_DATA_DIR")
+    external_data_dir: Path = Field(default=Path("data/external"), alias="EXTERNAL_DATA_DIR")
     processed_data_dir: Path = Field(default=Path("data/processed"), alias="PROCESSED_DATA_DIR")
     system_symbol: str = Field(default="BTC/EUR", alias="SYSTEM_SYMBOL")
     bitvavo_base_url: str = Field(default="https://api.bitvavo.com/v2", alias="BITVAVO_BASE_URL")
@@ -38,6 +39,7 @@ class Settings(BaseSettings):
             self.log_dir,
             self.reports_dir,
             self.raw_data_dir,
+            self.external_data_dir,
             self.processed_data_dir,
         ):
             directory.mkdir(parents=True, exist_ok=True)
