@@ -50,6 +50,14 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Cruce de regimen con triple barrier labels, Hypothesis 5 y SMA baseline
 - Runner `scripts/run_regime_analysis.py` con export reproducible a `reports/regime/<run_id>/`
 
+## Alcance de V3 / F3.3
+
+- Dataset supervisado auditable con features, labels triple barrier y regimen
+- Primera formulacion binaria sobria: `triple_barrier == +1` frente a `no positivo`
+- Modelos base: Logistic Regression regularizada y Random Forest pequeno
+- Validacion temporal estricta `train/validation/test` sin shuffle
+- Traduccion operacional minima a senal long/flat con backtest reproducible en `test`
+
 ## Alcance de F1.1
 
 - Estructura profesional de proyecto Python con `src/`
@@ -122,6 +130,7 @@ src/alpha_x/
   benchmarks/
   features/
   labeling/
+  modeling/
   regime/
   refinements/
   strategies/
@@ -362,3 +371,22 @@ El script:
 - exporta `compression_state` a partir de `range_pct_24_rank_72` como contexto auxiliar
 - cruza regimen con labels y con dos referencias simples: Hypothesis 5 y SMA baseline
 - exporta `summary.json`, `regime_table.csv`, `regime_summary.csv`, `regime_label_table.csv`, `regime_strategy_table.csv` y `manifest.json` en `reports/regime/<run_id>/`
+
+## V3 / F3.3 Uso rapido
+
+Ejecutar los modelos base:
+
+```powershell
+python .\scripts\run_model_baselines.py
+```
+
+El script:
+
+- construye un dataset supervisado con las 24 features, triple barrier y regimen
+- usa target binario inicial: `1` cuando triple barrier es `+1`, `0` en otro caso
+- descarta filas invalidas de forma explicita por warmup, regimen o label no disponible
+- entrena dos modelos base con split temporal `train/validation/test`
+- selecciona el mejor modelo por `balanced_accuracy` en validation con `macro_f1` como desempate
+- convierte el mejor baseline supervisado a una senal long/flat por umbral de probabilidad
+- compara ese backtest OOS contra Hypothesis 5 y SMA baseline
+- exporta `summary.json`, `supervised_dataset.csv`, `model_metrics.csv`, `regime_metrics.csv`, `backtest_comparison.csv` y `manifest.json` en `reports/modeling/<run_id>/`
