@@ -33,6 +33,15 @@ class Settings(BaseSettings):
     benchmark_dca_amount: float = Field(default=1_000.0, alias="BENCHMARK_DCA_AMOUNT")
     benchmark_sma_fast: int = Field(default=20, alias="BENCHMARK_SMA_FAST")
     benchmark_sma_slow: int = Field(default=50, alias="BENCHMARK_SMA_SLOW")
+    truth_timeframe: str = Field(default="1d", alias="TRUTH_TIMEFRAME")
+    truth_review_weekday: int = Field(default=6, alias="TRUTH_REVIEW_WEEKDAY")
+    truth_initial_capital: float = Field(default=10_000.0, alias="TRUTH_INITIAL_CAPITAL")
+    truth_base_fee_rate: float = Field(default=0.0025, alias="TRUTH_BASE_FEE_RATE")
+    truth_base_slippage_rate: float = Field(default=0.0005, alias="TRUTH_BASE_SLIPPAGE_RATE")
+    truth_mid_fee_rate: float = Field(default=0.0015, alias="TRUTH_MID_FEE_RATE")
+    truth_mid_slippage_rate: float = Field(default=0.0005, alias="TRUTH_MID_SLIPPAGE_RATE")
+    truth_stress_fee_rate: float = Field(default=0.0035, alias="TRUTH_STRESS_FEE_RATE")
+    truth_stress_slippage_rate: float = Field(default=0.0010, alias="TRUTH_STRESS_SLIPPAGE_RATE")
 
     def ensure_directories(self) -> None:
         for directory in (

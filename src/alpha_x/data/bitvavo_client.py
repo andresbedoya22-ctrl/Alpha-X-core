@@ -38,9 +38,28 @@ class BitvavoClient:
         if end is not None:
             params["end"] = end
 
+        payload = self._get_json(f"/{market}/candles", params=params)
+        if not isinstance(payload, list):
+            raise RuntimeError("Unexpected Bitvavo response format for candles endpoint.")
+
+        records = [self._to_record(row) for row in payload]
+        frame = pd.DataFrame([record.__dict__ for record in records])
+        return normalize_ohlcv_frame(frame)
+
+    def list_markets(self) -> list[str]:
+        payload = self._get_json("/markets")
+        if not isinstance(payload, list):
+            raise RuntimeError("Unexpected Bitvavo response format for markets endpoint.")
+        markets: list[str] = []
+        for row in payload:
+            if isinstance(row, dict) and "market" in row:
+                markets.append(str(row["market"]).upper())
+        return sorted(set(markets))
+
+    def _get_json(self, path: str, *, params: dict[str, Any] | None = None) -> Any:
         try:
             response = self.session.get(
-                f"{self.base_url}/{market}/candles",
+                f"{self.base_url}{path}",
                 params=params,
                 timeout=self.timeout,
             )
@@ -50,14 +69,7 @@ class BitvavoClient:
             raise RuntimeError(f"Bitvavo request failed: {message}") from error
         except requests.RequestException as error:
             raise RuntimeError(f"Bitvavo request failed: {error}") from error
-
-        payload = response.json()
-        if not isinstance(payload, list):
-            raise RuntimeError("Unexpected Bitvavo response format for candles endpoint.")
-
-        records = [self._to_record(row) for row in payload]
-        frame = pd.DataFrame([record.__dict__ for record in records])
-        return normalize_ohlcv_frame(frame)
+        return response.json()
 
     @staticmethod
     def _to_record(row: list[str]) -> OhlcvRecord:
