@@ -42,6 +42,14 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Integracion conservadora con el dataset OHLCV actual sin romper labeling ni backtest
 - Runner `scripts/run_feature_engine.py` con export reproducible a `reports/features/<run_id>/`
 
+## Alcance de V3 / F3.2a
+
+- Detector simple de regimen basado en reglas explicitas y reproducibles
+- Taxonomia corta de 6 regimenes por tendencia y volatilidad
+- `compression_state` exportado como contexto auxiliar para no inflar categorias
+- Cruce de regimen con triple barrier labels, Hypothesis 5 y SMA baseline
+- Runner `scripts/run_regime_analysis.py` con export reproducible a `reports/regime/<run_id>/`
+
 ## Alcance de F1.1
 
 - Estructura profesional de proyecto Python con `src/`
@@ -114,6 +122,7 @@ src/alpha_x/
   benchmarks/
   features/
   labeling/
+  regime/
   refinements/
   strategies/
   validation/
@@ -335,3 +344,21 @@ El script:
 - marca `valid_feature_row` solo cuando todas las features oficiales ya son validas
 - puede unir de forma opcional los labels de triple barrier ya existentes
 - exporta `summary.json`, `feature_table.csv`, `feature_catalog.csv` y `manifest.json` en `reports/features/<run_id>/`
+
+## V3 / F3.2a Uso rapido
+
+Ejecutar el analisis de regimen:
+
+```powershell
+python .\scripts\run_regime_analysis.py
+```
+
+El script:
+
+- reutiliza el feature engine y el labeling triple barrier ya disponibles
+- asigna un regimen simple por fila valida con reglas visibles en codigo
+- usa `dist_sma_72` y `sma_24_slope_4` para tendencia
+- usa `atr_pct_24` frente a su mediana rolling de 168 barras para volatilidad relativa
+- exporta `compression_state` a partir de `range_pct_24_rank_72` como contexto auxiliar
+- cruza regimen con labels y con dos referencias simples: Hypothesis 5 y SMA baseline
+- exporta `summary.json`, `regime_table.csv`, `regime_summary.csv`, `regime_label_table.csv`, `regime_strategy_table.csv` y `manifest.json` en `reports/regime/<run_id>/`
