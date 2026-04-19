@@ -130,6 +130,7 @@ def run_truth_engine(
             family_name=family.name,
             weighting_config=family.weighting,
             rebalance_config=rebalance,
+            initial_capital=cfg.initial_capital,
         )
         family_results[family.family_id] = simulation
         family_metrics[family.family_id] = calculate_truth_metrics(
@@ -138,6 +139,7 @@ def run_truth_engine(
             source_type="family",
             rebalance_count=int(simulation.metadata["rebalance_count"]),
             trade_count=int(simulation.metadata["trade_count"]),
+            capital_base=cfg.initial_capital,
         )
 
     benchmark_results = _run_benchmarks(aligned_frames, cfg)
@@ -155,6 +157,7 @@ def run_truth_engine(
         family_definitions=list(OFFICIAL_FAMILIES),
         fee_rate=cfg.fee_rate,
         slippage_rate=cfg.slippage_rate,
+        initial_capital=cfg.initial_capital,
     )
 
     manifest = {
@@ -381,6 +384,8 @@ def _build_benchmark_metrics(
             source_type="benchmark",
             rebalance_count=int(result.metadata.get("trades", 0)),
             trade_count=int(result.metadata.get("trades", 0)),
+            capital_base=float(result.metadata.get("capital_base", equity_curve["equity"].iloc[0])),
+            cash_flow_strategy=bool(result.metadata.get("cash_flow_strategy", False)),
         )
     return metrics
 
@@ -392,6 +397,7 @@ def _build_split_frame(
     family_definitions: list[FamilyDefinition],
     fee_rate: float,
     slippage_rate: float,
+    initial_capital: float,
 ) -> pd.DataFrame:
     dates = (
         score_panel.loc[:, ["timestamp", "datetime"]]
@@ -425,6 +431,7 @@ def _build_split_frame(
                 family_name=family.name,
                 weighting_config=family.weighting,
                 rebalance_config=rebalance,
+                initial_capital=initial_capital,
             )
             metrics = calculate_truth_metrics(
                 result.equity_curve,
@@ -432,6 +439,7 @@ def _build_split_frame(
                 source_type=split.segment,
                 rebalance_count=int(result.metadata["rebalance_count"]),
                 trade_count=int(result.metadata["trade_count"]),
+                capital_base=initial_capital,
             )
             row = metrics.__dict__.copy()
             row["split_id"] = split.split_id

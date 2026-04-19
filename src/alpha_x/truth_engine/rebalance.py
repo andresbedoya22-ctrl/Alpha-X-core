@@ -33,10 +33,13 @@ def simulate_family_portfolio(
     family_name: str,
     weighting_config: WeightingConfig,
     rebalance_config: RebalanceConfig,
+    initial_capital: float = 1.0,
     gross_exposure_column: str = "risk_multiplier",
 ) -> PortfolioSimulationResult:
     if score_panel.empty:
         raise ValueError("Portfolio simulation requires a non-empty score panel.")
+    if initial_capital <= 0:
+        raise ValueError("initial_capital must be positive.")
 
     dates = (
         score_panel.loc[:, ["timestamp", "datetime"]]
@@ -131,7 +134,8 @@ def simulate_family_portfolio(
     cost_rate = turnover * one_way_cost
     gross_bar_return = (active_weights * active_returns).sum(axis=1)
     net_bar_return = gross_bar_return - cost_rate
-    equity = (1.0 + net_bar_return).cumprod()
+    equity = initial_capital * (1.0 + net_bar_return).cumprod()
+    previous_equity = equity.shift(1).fillna(initial_capital)
 
     equity_curve = dates.copy()
     equity_curve["gross_return"] = gross_bar_return
@@ -139,7 +143,7 @@ def simulate_family_portfolio(
     equity_curve["equity"] = equity
     equity_curve["position"] = active_weights.sum(axis=1)
     equity_curve["turnover"] = turnover
-    equity_curve["trade_fee"] = cost_rate
+    equity_curve["trade_fee"] = cost_rate * previous_equity
 
     return PortfolioSimulationResult(
         equity_curve=equity_curve,
@@ -151,6 +155,9 @@ def simulate_family_portfolio(
             "review_weekday": rebalance_config.review_weekday,
             "fee_rate": rebalance_config.fee_rate,
             "slippage_rate": rebalance_config.slippage_rate,
+            "initial_capital": initial_capital,
+            "capital_base": initial_capital,
+            "equity_base_type": "nominal",
             "trade_count": int((turnover > 0).sum()),
             "rebalance_count": int(len(decision_rows)),
             "avg_exposure": float(active_weights.sum(axis=1).mean()),
