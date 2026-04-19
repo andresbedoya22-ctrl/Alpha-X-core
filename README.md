@@ -34,6 +34,14 @@ Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
 - Comparacion 1h vs 4h y baseline vs refinado con foco en OOS y churn
 - Export reproducible a `reports/refinements/<run_id>/`
 
+## Alcance de V3 / F3.1
+
+- Feature engine multi-horizonte corto, medio y largo sobre BTC-EUR
+- Catalogo oficial y auditable de features con definicion, parametros y warmup explicitos
+- Familias iniciales: returns, trend, volatility, compression y price structure
+- Integracion conservadora con el dataset OHLCV actual sin romper labeling ni backtest
+- Runner `scripts/run_feature_engine.py` con export reproducible a `reports/features/<run_id>/`
+
 ## Alcance de F1.1
 
 - Estructura profesional de proyecto Python con `src/`
@@ -104,6 +112,7 @@ python .\scripts\run_benchmarks.py
 ```text
 src/alpha_x/
   benchmarks/
+  features/
   labeling/
   refinements/
   strategies/
@@ -303,3 +312,26 @@ El script:
 - aplica minimum holding, cooldown y una confirmacion minima solo donde corresponde
 - compara resultados OOS agregados y deltas de churn frente a sus baselines
 - exporta `summary.json`, `validation_rows.csv`, `oos_summary.csv`, `comparisons.csv` y `manifest.json` en `reports/refinements/<run_id>/`
+
+## V3 / F3.1 Uso rapido
+
+Ejecutar el feature engine:
+
+```powershell
+python .\scripts\run_feature_engine.py
+```
+
+Ejemplo uniendo labels de triple barrier:
+
+```powershell
+python .\scripts\run_feature_engine.py --join-triple-barrier-labels
+```
+
+El script:
+
+- carga el dataset OHLCV persistido actual de BTC-EUR 1h
+- genera un set oficial y corto de features multi-horizonte con warmup visible
+- conserva `timestamp`, `datetime` y OHLCV base en la tabla final
+- marca `valid_feature_row` solo cuando todas las features oficiales ya son validas
+- puede unir de forma opcional los labels de triple barrier ya existentes
+- exporta `summary.json`, `feature_table.csv`, `feature_catalog.csv` y `manifest.json` en `reports/features/<run_id>/`
