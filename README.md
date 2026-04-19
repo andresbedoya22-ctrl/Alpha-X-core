@@ -122,6 +122,14 @@ comparativa sin demostrar edge todavia.
   `OHLCV + funding + ETF flows`.
 - `summary.json` incluye `known_limitations` con cobertura, comparabilidad y reglas de fill.
 
+## V4 / F4.1 Comparacion multi-activo
+
+- Reejecucion controlada del pipeline supervisado sobre la ventana comun enriquecida.
+- Misma ventana, mismo target, mismos modelos base y misma policy comun para BTC-EUR,
+  ETH-EUR, XRP-EUR y SOL-EUR.
+- Features tecnicas existentes + funding del activo + ETF flows BTC como contexto global.
+- Export reproducible a `reports/multi_asset_comparison/<run_id>/`.
+
 ## Alcance de V3 / F3.5
 
 - Stress test minimo de la policy condicional hallada en F3.4
