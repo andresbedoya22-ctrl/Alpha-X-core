@@ -1,0 +1,99 @@
+{
+  "artifacts": [
+    "ranking_4h_base.csv",
+    "ranking_4h_stress.csv",
+    "common_comparison_base.csv",
+    "common_comparison_stress.csv",
+    "rolling_robustness_base.csv",
+    "expanding_robustness_base.csv",
+    "block_bootstrap_base.csv",
+    "pro_layer_asymmetric_exit_base.csv",
+    "trade_log_best_4h_base.csv",
+    "trade_log_1d_official_base.csv",
+    "trade_log_best_4h_common_base.csv",
+    "trade_log_1d_official_common_base.csv",
+    "practical_2025_simulation_base.csv",
+    "manifest.json",
+    "study.md"
+  ],
+  "best_4h_config": {
+    "buffer": 0.035,
+    "confirmation_price": "close",
+    "deadband": 0.1,
+    "entry_persistence": 3,
+    "execution": "t+1 next candle close",
+    "exit_persistence": 3,
+    "exposure_off": "0% BTC / 100% EUR",
+    "exposure_on": "100% BTC",
+    "sma_window": 750
+  },
+  "common_period": {
+    "end": "2026-04-18 12:00:00+00:00",
+    "start": "2023-02-23 20:00:00+00:00"
+  },
+  "costs": {
+    "base": {
+      "fee_per_side": 0.002,
+      "slippage_per_side": 0.0005
+    },
+    "stress": {
+      "fee_per_side": 0.0025,
+      "slippage_per_side": 0.0008
+    }
+  },
+  "data": {
+    "1d": {
+      "bucket_alignment_utc": null,
+      "dataset_path": "data\\raw\\bitvavo\\btc-eur_1d.csv",
+      "end": "2026-04-19 00:00:00+00:00",
+      "first_timestamp": 1552003200000,
+      "gap_count": 2,
+      "has_unique_timestamps": true,
+      "incomplete_4h_bins_dropped": 0,
+      "is_sorted": true,
+      "last_timestamp": 1776556800000,
+      "row_count": 2598,
+      "source_gap_count": 0,
+      "source_timeframe": "1d",
+      "source_total_missing_intervals": 0,
+      "start": "2019-03-08 00:00:00+00:00",
+      "target_timeframe": "1d",
+      "total_missing_intervals": 2
+    },
+    "4h": {
+      "bucket_alignment_utc": "Unix epoch anchored 00:00/04:00/08:00/12:00/16:00/20:00 UTC",
+      "dataset_path": "data\\raw\\bitvavo\\btc-eur_1h.csv",
+      "end": "2026-04-18 12:00:00+00:00",
+      "first_timestamp": 1666382400000,
+      "gap_count": 22,
+      "has_unique_timestamps": true,
+      "incomplete_4h_bins_dropped": 35,
+      "is_sorted": true,
+      "last_timestamp": 1776513600000,
+      "row_count": 7614,
+      "source_gap_count": 22,
+      "source_timeframe": "1h",
+      "source_total_missing_intervals": 68,
+      "start": "2022-10-21 20:00:00+00:00",
+      "target_timeframe": "4h",
+      "total_missing_intervals": 35
+    }
+  },
+  "exchange": "bitvavo",
+  "market": "BTC-EUR",
+  "official_1d_reference": {
+    "buffer": 0.03,
+    "deadband": 0.1,
+    "execution": "t+1 next daily candle close",
+    "signal_on": "close > SMA125 * 1.03",
+    "sma_window": 125
+  },
+  "trade_notes": {
+    "1d": {
+      "notes": []
+    },
+    "4h": {
+      "notes": []
+    }
+  }
+}
