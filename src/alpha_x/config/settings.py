@@ -33,6 +33,33 @@ class Settings(BaseSettings):
     benchmark_dca_amount: float = Field(default=1_000.0, alias="BENCHMARK_DCA_AMOUNT")
     benchmark_sma_fast: int = Field(default=20, alias="BENCHMARK_SMA_FAST")
     benchmark_sma_slow: int = Field(default=50, alias="BENCHMARK_SMA_SLOW")
+    truth_timeframe: str = Field(default="1d", alias="TRUTH_TIMEFRAME")
+    truth_review_weekday: int = Field(default=6, alias="TRUTH_REVIEW_WEEKDAY")
+    truth_initial_capital: float = Field(default=10_000.0, alias="TRUTH_INITIAL_CAPITAL")
+    truth_base_fee_rate: float = Field(default=0.0025, alias="TRUTH_BASE_FEE_RATE")
+    truth_base_slippage_rate: float = Field(default=0.0005, alias="TRUTH_BASE_SLIPPAGE_RATE")
+    truth_mid_fee_rate: float = Field(default=0.0015, alias="TRUTH_MID_FEE_RATE")
+    truth_mid_slippage_rate: float = Field(default=0.0005, alias="TRUTH_MID_SLIPPAGE_RATE")
+    truth_stress_fee_rate: float = Field(default=0.0035, alias="TRUTH_STRESS_FEE_RATE")
+    truth_stress_slippage_rate: float = Field(default=0.0010, alias="TRUTH_STRESS_SLIPPAGE_RATE")
+    distance_buffer_state_path: Path = Field(
+        default=Path("data/execution_state/distance_buffer_v1_state.json"),
+        alias="DISTANCE_BUFFER_STATE_PATH",
+    )
+    distance_buffer_journal_path: Path = Field(
+        default=Path("data/execution_journal/distance_buffer_v1_trades.csv"),
+        alias="DISTANCE_BUFFER_JOURNAL_PATH",
+    )
+    distance_buffer_cost_scenario: str = Field(
+        default="base",
+        alias="DISTANCE_BUFFER_COST_SCENARIO",
+    )
+    distance_buffer_daily_run_time: str = Field(
+        default="22:15",
+        alias="DISTANCE_BUFFER_DAILY_RUN_TIME",
+    )
+    telegram_bot_token: str | None = Field(default=None, alias="TELEGRAM_BOT_TOKEN")
+    telegram_chat_id: str | None = Field(default=None, alias="TELEGRAM_CHAT_ID")
 
     def ensure_directories(self) -> None:
         for directory in (

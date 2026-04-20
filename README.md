@@ -1,6 +1,89 @@
 # ALPHA-X CORE
 
-Base reproducible para la etapa V1 del proyecto ALPHA-X CORE.
+## Estado actual
+
+El roadmap vigente cambio. El foco principal del repositorio ya no es el track previo de labeling/modeling/policies.
+
+La etapa activa es **Fase 1 - Truth Engine**:
+
+- Exchange base: `Bitvavo`
+- Universo base: `crypto-only`
+- Sesgo estructural: `long-only`
+- Timeframe principal de investigacion: `1D`
+- Frecuencia natural de decision: `weekly review`
+- Objetivo: descubrir si existe edge economico real, robusto y reproducible antes de volver a modelado mas complejo
+
+## Flujo principal actual
+
+1. Ingerir o validar OHLCV diario de Bitvavo para el universo oficial.
+2. Evaluar elegibilidad minima por activo.
+3. Construir senales sobrias y regimen BTC diario.
+4. Comparar familias oficiales del Truth Engine contra benchmarks con fees y slippage explicitos.
+5. Exportar resultados reproducibles a `reports/truth_engine/<run_id>/`.
+
+## Modulos y scripts vigentes para Fase 1
+
+### Capa nueva
+
+- `src/alpha_x/truth_engine/universe.py`
+- `src/alpha_x/truth_engine/eligibility.py`
+- `src/alpha_x/truth_engine/signals.py`
+- `src/alpha_x/truth_engine/scoring.py`
+- `src/alpha_x/truth_engine/regimes.py`
+- `src/alpha_x/truth_engine/weighting.py`
+- `src/alpha_x/truth_engine/rebalance.py`
+- `src/alpha_x/truth_engine/families.py`
+- `src/alpha_x/truth_engine/comparison.py`
+- `src/alpha_x/truth_engine/metrics.py`
+- `src/alpha_x/truth_engine/reporting.py`
+
+### Scripts principales
+
+- `python .\scripts\run_truth_engine.py`
+- `python .\scripts\run_truth_robustness.py`
+- `python .\scripts\fetch_truth_engine_1d.py`
+
+## Datos 1D del universo oficial
+
+Poblar OHLCV diario del universo oficial en `data/raw/bitvavo/`:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\fetch_truth_engine_1d.py --run-id truth-data --target-rows 2500
+```
+
+Validar cobertura sin descargar de nuevo:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\fetch_truth_engine_1d.py --run-id truth-data-validate --validate-only
+```
+
+Verificar cobertura en:
+
+- `reports/truth_engine_data/<run_id>/summary.json`
+- `reports/truth_engine_data/<run_id>/asset_coverage.csv`
+
+Luego correr Truth Engine:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\run_truth_engine.py --run-id truth-base --cost-scenario base
+```
+
+## Costes activos en Fase 1
+
+- Escenario `base`: fee `0.25%` por lado + slippage configurable
+- Escenario `mid`: mezcla maker/taker conservadora con fee medio menor
+- Escenario `stress`: fee y slippage mas altos
+- No se aceptan resultados sin costes
+
+## Benchmarks obligatorios activos
+
+- Buy & Hold BTC
+- DCA BTC
+- SMA baseline reutilizable
+- Equal-weight basket del universo con rebalanceo trimestral
+- BTC/ETH `60/40` con rebalanceo trimestral
+
+## Legacy / Previous Research Track
 
 ## Alcance de V2 / F2.1
 
