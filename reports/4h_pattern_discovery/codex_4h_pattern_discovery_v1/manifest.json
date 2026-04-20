@@ -1,0 +1,115 @@
+{
+  "artifacts": [
+    "baseline_2025_trade_features.csv",
+    "best_candidate_trade_log_base.csv",
+    "block_bootstrap_base.csv",
+    "candidate_grid_base.csv",
+    "comparison_base.csv",
+    "comparison_stress.csv",
+    "entry_feature_table.csv",
+    "exit_pattern_summary.csv",
+    "expanding_robustness_base.csv",
+    "manifest.json",
+    "pattern_summary.csv",
+    "practical_2025_simulation_base.csv",
+    "rolling_robustness_base.csv",
+    "selected_candidates_base.csv",
+    "study.md"
+  ],
+  "best_candidate": {
+    "avg_exposure": 0.5297202797202797,
+    "buffer": 0.03,
+    "cagr": 0.4169673616710292,
+    "calmar": 2.099693870600581,
+    "candidate_family": "4H asymmetric exit repair",
+    "complete_trades": 25,
+    "confirmation_price": "close",
+    "end": "2026-04-18 12:00:00+00:00",
+    "entry_persistence": 3,
+    "exit_persistence": 1,
+    "expectancy": 0.0692277870615403,
+    "fee_drag": 0.24681669511052204,
+    "fee_only_drag": 0.19745335608841766,
+    "final_equity": 29951.780451733604,
+    "logic": "Keep normal threshold entry, but exit on first confirmed threshold loss to reduce give-back.",
+    "max_drawdown": -0.1985848353940105,
+    "name": "4H asymmetric exit repair | SMA700 | buffer 3.0% | p3/1",
+    "pattern_source": "False exits and late exits showed deterioration before the 3/3 exit confirmed.",
+    "profit_factor": 7.2172927055627065,
+    "rebalances": 51,
+    "sharpe": 1.200773777992262,
+    "slippage_drag": 0.049363339022104415,
+    "sma_window": 700,
+    "start": "2023-02-23 20:00:00+00:00",
+    "timeframe": "4h",
+    "top_1_concentration": 0.5782246637894591,
+    "top_3_concentration": 1.019509327034723,
+    "top_5_concentration": 1.1517516823713598,
+    "total_return": 1.9951780451733603,
+    "trades_per_year": 7.942519570890114,
+    "turnover": 51.0,
+    "variant": "asymmetric_exit"
+  },
+  "common_period": {
+    "end": "2026-04-18 12:00:00+00:00",
+    "start": "2023-02-23 20:00:00+00:00"
+  },
+  "costs": {
+    "base": {
+      "fee_per_side": 0.002,
+      "slippage_per_side": 0.0005
+    },
+    "stress": {
+      "fee_per_side": 0.0025,
+      "slippage_per_side": 0.0008
+    }
+  },
+  "data": {
+    "1d": {
+      "bucket_alignment_utc": null,
+      "dataset_path": "data\\raw\\bitvavo\\btc-eur_1d.csv",
+      "end": "2026-04-19 00:00:00+00:00",
+      "first_timestamp": 1552003200000,
+      "gap_count": 2,
+      "has_unique_timestamps": true,
+      "incomplete_4h_bins_dropped": 0,
+      "is_sorted": true,
+      "last_timestamp": 1776556800000,
+      "row_count": 2598,
+      "source_gap_count": 0,
+      "source_timeframe": "1d",
+      "source_total_missing_intervals": 0,
+      "start": "2019-03-08 00:00:00+00:00",
+      "target_timeframe": "1d",
+      "total_missing_intervals": 2
+    },
+    "4h": {
+      "bucket_alignment_utc": "Unix epoch anchored 00:00/04:00/08:00/12:00/16:00/20:00 UTC",
+      "dataset_path": "data\\raw\\bitvavo\\btc-eur_1h.csv",
+      "end": "2026-04-18 12:00:00+00:00",
+      "first_timestamp": 1666382400000,
+      "gap_count": 22,
+      "has_unique_timestamps": true,
+      "incomplete_4h_bins_dropped": 35,
+      "is_sorted": true,
+      "last_timestamp": 1776513600000,
+      "row_count": 7614,
+      "source_gap_count": 22,
+      "source_timeframe": "1h",
+      "source_total_missing_intervals": 68,
+      "start": "2022-10-21 20:00:00+00:00",
+      "target_timeframe": "4h",
+      "total_missing_intervals": 35
+    }
+  },
+  "exchange": "bitvavo",
+  "market": "BTC-EUR",
+  "previous_4h": {
+    "buffer": 0.035,
+    "entry_persistence": 3,
+    "exit_persistence": 3,
+    "name": "Previous best 4H corrected",
+    "sma_window": 750,
+    "timeframe": "4h"
+  }
+}
