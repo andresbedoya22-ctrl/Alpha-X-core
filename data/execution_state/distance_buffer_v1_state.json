@@ -1,0 +1,9 @@
+{
+  "current_exposure": 0.0,
+  "last_action": "HOLD",
+  "last_reason": "close <= SMA125 * 1.03 but delta < deadband",
+  "last_rebalance_date": null,
+  "last_signal_date": "2026-04-19",
+  "reference_price": 63736.0,
+  "updated_at_utc": "2026-04-20 18:19:58+00:00"
+}
