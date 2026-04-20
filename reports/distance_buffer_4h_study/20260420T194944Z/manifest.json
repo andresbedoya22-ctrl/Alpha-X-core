@@ -1,0 +1,87 @@
+{
+  "artifacts": [
+    "full_sample_base.csv",
+    "full_sample_stress.csv",
+    "common_comparison_base.csv",
+    "common_comparison_stress.csv",
+    "temporal_robustness_base.csv",
+    "trade_log_4h_base.csv",
+    "trade_log_1d_base.csv",
+    "manifest.json",
+    "study.md"
+  ],
+  "costs": {
+    "base": {
+      "fee_per_side": 0.002,
+      "slippage_per_side": 0.0005
+    },
+    "stress": {
+      "fee_per_side": 0.0025,
+      "slippage_per_side": 0.0008
+    }
+  },
+  "data": {
+    "1d": {
+      "dataset_path": "data\\raw\\bitvavo\\btc-eur_1d.csv",
+      "end": "2026-04-19 00:00:00+00:00",
+      "first_useful_execution": "2019-07-11 00:00:00+00:00",
+      "first_useful_signal": "2019-07-10 00:00:00+00:00",
+      "gap_count": 2,
+      "has_unique_timestamps": true,
+      "incomplete_4h_bins_dropped": 0,
+      "is_sorted": true,
+      "row_count": 2598,
+      "source_gap_count": 0,
+      "source_timeframe": "1d",
+      "source_total_missing_intervals": 0,
+      "start": "2019-03-08 00:00:00+00:00",
+      "target_timeframe": "1d",
+      "total_missing_intervals": 2
+    },
+    "4h": {
+      "dataset_path": "data\\raw\\bitvavo\\btc-eur_1h.csv",
+      "end": "2026-04-18 12:00:00+00:00",
+      "first_useful_execution": "2022-11-11 16:00:00+00:00",
+      "first_useful_signal": "2022-11-11 12:00:00+00:00",
+      "gap_count": 22,
+      "has_unique_timestamps": true,
+      "incomplete_4h_bins_dropped": 35,
+      "is_sorted": true,
+      "row_count": 7614,
+      "source_gap_count": 22,
+      "source_timeframe": "1h",
+      "source_total_missing_intervals": 68,
+      "start": "2022-10-21 20:00:00+00:00",
+      "target_timeframe": "4h",
+      "total_missing_intervals": 35
+    }
+  },
+  "exchange": "bitvavo",
+  "market": "BTC-EUR",
+  "strategy": {
+    "asset": "BTC/EUR",
+    "buffer": 0.03,
+    "deadband": 0.1,
+    "execution": "t+1 next candle close",
+    "exposure_off": "0% BTC / 100% EUR",
+    "exposure_on": "100% BTC",
+    "name": "Distance buffer",
+    "signal_off": "close <= SMA125 * 1.03",
+    "signal_on": "close > SMA125 * 1.03",
+    "sma_window": 125
+  },
+  "trade_notes": {
+    "1d": {
+      "notes": []
+    },
+    "4h": {
+      "notes": [
+        {
+          "note": "Open trade excluded from complete-trade statistics.",
+          "signal_datetime": "2026-04-13 16:00:00+00:00",
+          "transition": "OFF_TO_ON"
+        }
+      ]
+    }
+  }
+}
